@@ -40,4 +40,10 @@ app.MapStaticAssets();
 app.MapRazorPages()
    .WithStaticAssets();
 
+app.MapGet("/apiservice", async (ApiServiceClient client) =>
+{
+    var result = await client.GetHomeAsync();
+    return Results.Ok(result);
+});
+
 app.Run();
