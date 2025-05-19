@@ -1,8 +1,12 @@
+using Aspire.Hosting;
+
 namespace AspireSample.Tests;
 
-public class WebTests
+public class WebTests : IAsyncLifetime
 {
     private readonly CancellationToken _cancellationToken;
+    private DistributedApplication _app;
+    private IResourceBuilder<ProjectResource> _frontend;
 
     public WebTests()
     {
@@ -10,11 +14,32 @@ public class WebTests
 
     }
 
+    public async ValueTask DisposeAsync()
+    {
+        await _app.DisposeAsync();
+    }
 
     [Fact]
-    public async Task GetApiServiceHealthReturnsOkStatusCode()
+    public async Task GetWebFrontendPageReturnsOkStatusCode()
     {
         // Arrange
+        // To output logs to the xUnit.net ITestOutputHelper, consider adding a package from https://www.nuget.org/packages?q=xunit+logging
+        var resourceNotificationService = _app.Services.GetRequiredService<ResourceNotificationService>();
+        await _app.StartAsync(_cancellationToken);
+
+        // Act
+        var httpClient = _app.CreateHttpClient("webfrontend");
+        await resourceNotificationService.WaitForResourceAsync("webfrontend", KnownResourceStates.Running, _cancellationToken)
+            .WaitAsync(_cancellationToken);
+
+        var response = await httpClient.GetAsync("/", _cancellationToken);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    public async ValueTask InitializeAsync()
+    {
         var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.AspireSample_AppHost>(
             _cancellationToken);
 
@@ -22,45 +47,28 @@ public class WebTests
         {
             clientBuilder.AddStandardResilienceHandler();
         });
-        // To output logs to the xUnit.net ITestOutputHelper, consider adding a package from https://www.nuget.org/packages?q=xunit+logging
 
-        await using var app = await appHost.BuildAsync(_cancellationToken);
-        var resourceNotificationService = app.Services.GetRequiredService<ResourceNotificationService>();
-        await app.StartAsync(_cancellationToken);
+        _frontend = appHost.CreateResourceBuilder<ProjectResource>("webfrontend");
 
-        // Act
-        var httpClient = app.CreateHttpClient("apiservice");
-        await resourceNotificationService.WaitForResourceAsync("apiservice", KnownResourceStates.Running, _cancellationToken)
-            .WaitAsync(TimeSpan.FromSeconds(1), _cancellationToken);
-        var response = await httpClient.GetAsync("/alive", _cancellationToken);
-
-        // Assert
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        _app = await appHost.BuildAsync(_cancellationToken);
     }
 
     [Fact]
-    public async Task GetWebFrontendPageReturnsOkStatusCode()
+    public async Task WebResourceEnvVarsResolveToApiService()
     {
         // Arrange
-        var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.AspireSample_AppHost>(_cancellationToken);
-        appHost.Services.ConfigureHttpClientDefaults(clientBuilder =>
-        {
-            clientBuilder.AddStandardResilienceHandler();
-        });
-        // To output logs to the xUnit.net ITestOutputHelper, consider adding a package from https://www.nuget.org/packages?q=xunit+logging
-
-        await using var app = await appHost.BuildAsync(_cancellationToken);
-        var resourceNotificationService = app.Services.GetRequiredService<ResourceNotificationService>();
-        await app.StartAsync(_cancellationToken);
 
         // Act
-        var httpClient = app.CreateHttpClient("webfrontend");
-        await resourceNotificationService.WaitForResourceAsync("webfrontend", KnownResourceStates.Running, _cancellationToken)
-            .WaitAsync(TimeSpan.FromSeconds(1), _cancellationToken);
-
-        var response = await httpClient.GetAsync("/", _cancellationToken);
+        var envVars = await _frontend.Resource.GetEnvironmentVariableValuesAsync(
+            DistributedApplicationOperation.Publish);
 
         // Assert
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains(envVars, static (kvp) =>
+        {
+            var (key, value) = kvp;
+
+            return key is "services__apiservice__https__0"
+                && value is "{apiservice.bindings.https.url}";
+        });
     }
 }

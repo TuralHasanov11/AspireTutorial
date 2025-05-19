@@ -1,5 +1,6 @@
 using AspireSample.ApiService.Data;
 using Microsoft.AspNetCore.Mvc;
+using OpenTelemetry.Exporter;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,9 @@ builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
 
 builder.AddNpgsqlDbContext<CatalogDbContext>("catalog");
+
+var oltpApiKey = builder.Configuration.GetValue<string>("OTLP_API_KEY");
+builder.Services.Configure<OtlpExporterOptions>(o => o.Headers = $"x-otlp-api-key={oltpApiKey}");
 
 var app = builder.Build();
 

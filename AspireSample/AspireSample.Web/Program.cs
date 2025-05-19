@@ -1,4 +1,5 @@
 using AspireSample.Web.Services;
+using OpenTelemetry.Exporter;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,9 @@ builder.Services.AddHttpClient<ApiServiceClient>((sp, client) =>
 
     client.BaseAddress = new(apiEndpoint);
 });
+
+var oltpApiKey = builder.Configuration.GetValue<string>("OTLP_API_KEY");
+builder.Services.Configure<OtlpExporterOptions>(o => o.Headers = $"x-otlp-api-key={oltpApiKey}");
 
 var app = builder.Build();
 
