@@ -20,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Commands.md = Commands.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspireSample.WorkerService", "AspireSample\AspireSample.WorkerService\AspireSample.WorkerService.csproj", "{0DE613E4-238E-4F7A-96FA-25B79B33AB7B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,6 +48,10 @@ Global
 		{6FFE6D11-308C-404E-A20D-2B30D981FBB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6FFE6D11-308C-404E-A20D-2B30D981FBB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6FFE6D11-308C-404E-A20D-2B30D981FBB7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0DE613E4-238E-4F7A-96FA-25B79B33AB7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DE613E4-238E-4F7A-96FA-25B79B33AB7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DE613E4-238E-4F7A-96FA-25B79B33AB7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DE613E4-238E-4F7A-96FA-25B79B33AB7B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -56,6 +62,7 @@ Global
 		{694F58C2-D4D5-CE0E-E317-3C2F24DE6B42} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{FF3FAA7B-93B0-4567-E9D5-B03127F9A3A0} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{6FFE6D11-308C-404E-A20D-2B30D981FBB7} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{0DE613E4-238E-4F7A-96FA-25B79B33AB7B} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4B9023DE-E3D7-4F6E-86B1-759E0177E3AB}

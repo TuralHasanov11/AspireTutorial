@@ -10,10 +10,25 @@ builder.AddServiceDefaults();
 // Add services to the container.
 builder.Services.AddProblemDetails();
 
+builder.AddRedisDistributedCache("cache");
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-builder.AddNpgsqlDbContext<CatalogDbContext>("catalog");
+builder.AddNpgsqlDbContext<CatalogDbContext>(
+    "catalog",
+    settings =>
+    {
+        settings.CommandTimeout = 30;
+    },
+    options =>
+    {
+        if (builder.Environment.IsDevelopment())
+        {
+            options.EnableSensitiveDataLogging()
+                .EnableDetailedErrors();
+        }
+    });
 
 var oltpApiKey = builder.Configuration.GetValue<string>("OTLP_API_KEY");
 builder.Services.Configure<OtlpExporterOptions>(o => o.Headers = $"x-otlp-api-key={oltpApiKey}");
@@ -33,6 +48,10 @@ if (app.Environment.IsDevelopment())
         context.Database.EnsureCreated();
     }
 }
+
+app.UseRequestTimeouts();
+
+app.UseOutputCache();
 
 app.MapDefaultEndpoints();
 

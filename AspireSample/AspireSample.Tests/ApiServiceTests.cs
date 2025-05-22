@@ -14,6 +14,25 @@ public class ApiServiceTests : IAsyncLifetime
 
     }
 
+    public async ValueTask InitializeAsync()
+    {
+        var appHost = await DistributedApplicationTestingBuilder
+            .CreateAsync<Projects.AspireSample_AppHost>(
+                [
+                    "UseVolumes=false",
+                ],
+                _cancellationToken);
+
+        appHost.Services.ConfigureHttpClientDefaults(clientBuilder =>
+        {
+            clientBuilder.AddStandardResilienceHandler();
+        });
+
+        _apiService = appHost.CreateResourceBuilder<ProjectResource>("apiservice");
+
+        _app = await appHost.BuildAsync(_cancellationToken);
+    }
+
     public async ValueTask DisposeAsync()
     {
         await _app.DisposeAsync();
@@ -29,26 +48,16 @@ public class ApiServiceTests : IAsyncLifetime
 
         // Act
         var httpClient = _app.CreateHttpClient("apiservice");
-        await resourceNotificationService.WaitForResourceAsync("apiservice", KnownResourceStates.Running, _cancellationToken)
-            .WaitAsync(_cancellationToken);
+
+        await resourceNotificationService.WaitForResourceAsync(
+            "apiservice",
+            KnownResourceStates.Running,
+            _cancellationToken);
+
         var response = await httpClient.GetAsync("/alive", _cancellationToken);
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
-    public async ValueTask InitializeAsync()
-    {
-        var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.AspireSample_AppHost>(
-            _cancellationToken);
-
-        appHost.Services.ConfigureHttpClientDefaults(clientBuilder =>
-        {
-            clientBuilder.AddStandardResilienceHandler();
-        });
-
-        _apiService = appHost.CreateResourceBuilder<ProjectResource>("apiservice");
-
-        _app = await appHost.BuildAsync(_cancellationToken);
-    }
 }

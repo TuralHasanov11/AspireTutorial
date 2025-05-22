@@ -1,5 +1,6 @@
 using Aspire.Hosting.Lifecycle;
 using AspireSample.AppHost;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -47,12 +48,16 @@ builder.Eventing.Subscribe<ConnectionStringAvailableEvent>(
         return Task.CompletedTask;
     });
 
-var postgres = builder.AddPostgres("postgres")
-    .WithDataVolume()
-    .WithPgAdmin(resource =>
-    {
-        resource.WithUrlForEndpoint("https", u => u.DisplayText = "PG Admin");
-    });
+var postgres = builder.AddPostgres("postgres");
+
+if (builder.Configuration.GetValue("UseVolumes", true))
+{
+    postgres.WithDataVolume()
+        .WithPgAdmin(resource =>
+        {
+            resource.WithUrlForEndpoint("https", u => u.DisplayText = "PG Admin");
+        });
+}
 
 var catalogDb = postgres.AddDatabase("catalog")
     .WithClearCommand();
@@ -110,5 +115,7 @@ builder.Eventing.Subscribe<AfterResourcesCreatedEvent>(
 
         return Task.CompletedTask;
     });
+
+builder.AddProject<Projects.AspireSample_WorkerService>("aspiresample-workerservice");
 
 builder.Build().Run();

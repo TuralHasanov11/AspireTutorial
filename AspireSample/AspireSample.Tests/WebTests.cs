@@ -29,8 +29,11 @@ public class WebTests : IAsyncLifetime
 
         // Act
         var httpClient = _app.CreateHttpClient("webfrontend");
-        await resourceNotificationService.WaitForResourceAsync("webfrontend", KnownResourceStates.Running, _cancellationToken)
-            .WaitAsync(_cancellationToken);
+
+        await resourceNotificationService.WaitForResourceAsync(
+            "webfrontend",
+            KnownResourceStates.Running,
+            _cancellationToken);
 
         var response = await httpClient.GetAsync("/", _cancellationToken);
 
