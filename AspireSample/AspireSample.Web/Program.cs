@@ -3,6 +3,9 @@ using OpenTelemetry.Exporter;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Host.UseDefaultServiceProvider(config => config.ValidateOnBuild = true);
+builder.WebHost.UseKestrel(options => options.AddServerHeader = false);
+
 builder.AddServiceDefaults();
 
 // Add services to the container.
@@ -22,6 +25,8 @@ builder.Services.AddHttpClient<ApiServiceClient>((sp, client) =>
 var oltpApiKey = builder.Configuration.GetValue<string>("OTLP_API_KEY");
 builder.Services.Configure<OtlpExporterOptions>(o => o.Headers = $"x-otlp-api-key={oltpApiKey}");
 
+builder.AddRedisOutputCache("cache");
+
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
@@ -37,6 +42,8 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseRouting();
+
+app.UseOutputCache();
 
 app.UseAuthorization();
 

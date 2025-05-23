@@ -7,6 +7,44 @@ namespace AspireSample.AppHost;
 
 internal static class RedisResourceBuilderExtensions
 {
+    internal static void AddCacheEvents(
+        this IDistributedApplicationBuilder builder,
+        IResourceBuilder<IResourceWithConnectionString> cache)
+    {
+        builder.Eventing.Subscribe<ResourceReadyEvent>(
+            cache.Resource,
+            static (@event, cancellationToken) =>
+            {
+                var logger = @event.Services.GetRequiredService<ILogger<Program>>();
+
+                logger.LogInformation("3. ResourceReadyEvent");
+
+                return Task.CompletedTask;
+            });
+
+        builder.Eventing.Subscribe<BeforeResourceStartedEvent>(
+            cache.Resource,
+            static (@event, cancellationToken) =>
+            {
+                var logger = @event.Services.GetRequiredService<ILogger<Program>>();
+
+                logger.LogInformation("2. BeforeResourceStartedEvent");
+
+                return Task.CompletedTask;
+            });
+
+        builder.Eventing.Subscribe<ConnectionStringAvailableEvent>(
+            cache.Resource,
+            static (@event, cancellationToken) =>
+            {
+                var logger = @event.Services.GetRequiredService<ILogger<Program>>();
+
+                logger.LogInformation("1. ConnectionStringAvailableEvent");
+
+                return Task.CompletedTask;
+            });
+    }
+
     internal static IResourceBuilder<RedisResource> WithClearCommand(this IResourceBuilder<RedisResource> builder)
     {
         builder.WithCommand(

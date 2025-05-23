@@ -2,7 +2,6 @@ using Aspire.Hosting.Lifecycle;
 using AspireSample.AppHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -11,42 +10,17 @@ builder.Services.AddLifecycleHook<LifecycleLogger>();
 var cache = builder.ExecutionContext.IsRunMode
     ? builder.AddRedis("cache")
         .WithDataVolume()
+        .WithPersistence(
+            interval: TimeSpan.FromMinutes(5),
+            keysChangedThreshold: 100)
         .WithImageTag("latest")
+        .WithRedisInsight()
         .WithClearCommand()
     : builder.AddConnectionString("cache");
 
-builder.Eventing.Subscribe<ResourceReadyEvent>(
-    cache.Resource,
-    static (@event, cancellationToken) =>
-    {
-        var logger = @event.Services.GetRequiredService<ILogger<Program>>();
+builder.AddCacheEvents(cache);
 
-        logger.LogInformation("3. ResourceReadyEvent");
-
-        return Task.CompletedTask;
-    });
-
-builder.Eventing.Subscribe<BeforeResourceStartedEvent>(
-    cache.Resource,
-    static (@event, cancellationToken) =>
-    {
-        var logger = @event.Services.GetRequiredService<ILogger<Program>>();
-
-        logger.LogInformation("2. BeforeResourceStartedEvent");
-
-        return Task.CompletedTask;
-    });
-
-builder.Eventing.Subscribe<ConnectionStringAvailableEvent>(
-    cache.Resource,
-    static (@event, cancellationToken) =>
-    {
-        var logger = @event.Services.GetRequiredService<ILogger<Program>>();
-
-        logger.LogInformation("1. ConnectionStringAvailableEvent");
-
-        return Task.CompletedTask;
-    });
+var messaging = builder.AddRabbitMQ("messaging");
 
 var postgres = builder.AddPostgres("postgres");
 
@@ -59,13 +33,12 @@ if (builder.Configuration.GetValue("UseVolumes", true))
         });
 }
 
-var catalogDb = postgres.AddDatabase("catalog")
+var catalogDb = postgres.AddDatabase("catalogdb")
     .WithClearCommand();
-
 
 var apiCacheInvalidationKey = builder.AddParameter("ApiCacheInvalidationKey", secret: true);
 
-var apiService = builder.AddProject<Projects.AspireSample_ApiService>("apiservice")
+var catalogService = builder.AddProject<Projects.AspireSample_Catalog_Api>("catalogapi")
     .WithExternalHttpEndpoints()
     .WithUrlForEndpoint("https", url =>
     {
@@ -76,46 +49,22 @@ var apiService = builder.AddProject<Projects.AspireSample_ApiService>("apiservic
     .WithClearCache(apiCacheInvalidationKey)
     .WithReference(catalogDb)
     .WithReplicas(2)
-    .WaitFor(catalogDb);
+    .WaitFor(catalogDb)
+    .WithReference(messaging)
+    .WaitFor(messaging);
+
 
 builder.AddProject<Projects.AspireSample_Web>("webfrontend")
     .WithExternalHttpEndpoints()
     .WithReference(cache)
     .WaitFor(cache)
-    .WithReference(apiService)
-    .WaitFor(apiService);
+    .WithReference(catalogService)
+    .WaitFor(catalogService);
 
+builder.AddProject<Projects.AspireSample_WorkerService>("workerservice")
+    .WithReference(catalogDb)
+    .WaitFor(catalogDb);
 
-builder.Eventing.Subscribe<BeforeStartEvent>(
-    static (@event, cancellationToken) =>
-    {
-        var logger = @event.Services.GetRequiredService<ILogger<Program>>();
-
-        logger.LogInformation("1. BeforeStartEvent");
-
-        return Task.CompletedTask;
-    });
-
-builder.Eventing.Subscribe<AfterEndpointsAllocatedEvent>(
-    static (@event, cancellationToken) =>
-    {
-        var logger = @event.Services.GetRequiredService<ILogger<Program>>();
-
-        logger.LogInformation("2. AfterEndpointsAllocatedEvent");
-
-        return Task.CompletedTask;
-    });
-
-builder.Eventing.Subscribe<AfterResourcesCreatedEvent>(
-    static (@event, cancellationToken) =>
-    {
-        var logger = @event.Services.GetRequiredService<ILogger<Program>>();
-
-        logger.LogInformation("3. AfterResourcesCreatedEvent");
-
-        return Task.CompletedTask;
-    });
-
-builder.AddProject<Projects.AspireSample_WorkerService>("aspiresample-workerservice");
+builder.SubsribeToHostEvents();
 
 builder.Build().Run();

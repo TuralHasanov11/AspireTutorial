@@ -1,24 +1,65 @@
-namespace AspireSample.WorkerService
+using System.Diagnostics;
+using AspireSample.Catalog.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+
+namespace AspireSample.WorkerService;
+
+public class Worker(
+    ILogger<Worker> logger,
+    IServiceProvider serviceProvider,
+    IHostApplicationLifetime hostApplicationLifetime) : BackgroundService
 {
-    public class Worker : BackgroundService
+    public const string ActivitySourceName = "Migrations";
+    private static readonly ActivitySource ActivitySource = new(ActivitySourceName);
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        private readonly ILogger<Worker> _logger;
+        using var activity = ActivitySource.StartActivity("Migrating database", ActivityKind.Client);
 
-        public Worker(ILogger<Worker> logger)
+        logger.LogInformation("Starting database migration.");
+
+        try
         {
-            _logger = logger;
+            using var scope = serviceProvider.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
+
+            await RunMigrationAsync(dbContext, stoppingToken);
+            await SeedDataAsync(dbContext, stoppingToken);
+
+            logger.LogInformation("Database migration completed successfully.");
+        }
+        catch (Exception ex)
+        {
+            activity?.AddException(ex);
+            logger.LogError(ex, "An error occurred during database migration.");
+            throw;
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        hostApplicationLifetime.StopApplication();
+    }
+
+    private static async Task RunMigrationAsync(CatalogDbContext dbContext, CancellationToken cancellationToken)
+    {
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async () =>
         {
-            while (!stoppingToken.IsCancellationRequested)
+            // Run migration in a transaction to avoid partial migration if it fails.
+            if (dbContext.Database.GetMigrations().Any())
             {
-                if (_logger.IsEnabled(LogLevel.Information))
-                {
-                    _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                }
-                await Task.Delay(1000, stoppingToken);
+                await dbContext.Database.MigrateAsync(cancellationToken);
             }
-        }
+        });
+    }
+
+    private static async Task SeedDataAsync(CatalogDbContext dbContext, CancellationToken cancellationToken)
+    {
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+            // Seed data here.
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+        });
     }
 }

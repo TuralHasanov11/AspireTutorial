@@ -17,6 +17,7 @@ public class WebTests : IAsyncLifetime
     public async ValueTask DisposeAsync()
     {
         await _app.DisposeAsync();
+        GC.SuppressFinalize(this);
     }
 
     [Fact]
@@ -28,7 +29,7 @@ public class WebTests : IAsyncLifetime
         await _app.StartAsync(_cancellationToken);
 
         // Act
-        var httpClient = _app.CreateHttpClient("webfrontend");
+        using var httpClient = _app.CreateHttpClient("webfrontend");
 
         await resourceNotificationService.WaitForResourceAsync(
             "webfrontend",
@@ -70,8 +71,8 @@ public class WebTests : IAsyncLifetime
         {
             var (key, value) = kvp;
 
-            return key is "services__apiservice__https__0"
-                && value is "{apiservice.bindings.https.url}";
+            return key is "services__catalogapi__https__0"
+                && value is "{catalogapi.bindings.https.url}";
         });
     }
 }

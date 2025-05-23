@@ -2,13 +2,13 @@
 
 namespace AspireSample.Tests;
 
-public class ApiServiceTests : IAsyncLifetime
+public class CatalogServiceTests : IAsyncLifetime
 {
     private readonly CancellationToken _cancellationToken;
     private DistributedApplication _app;
     private IResourceBuilder<ProjectResource> _apiService;
 
-    public ApiServiceTests()
+    public CatalogServiceTests()
     {
         _cancellationToken = TestContext.Current.CancellationToken;
 
@@ -28,7 +28,7 @@ public class ApiServiceTests : IAsyncLifetime
             clientBuilder.AddStandardResilienceHandler();
         });
 
-        _apiService = appHost.CreateResourceBuilder<ProjectResource>("apiservice");
+        _apiService = appHost.CreateResourceBuilder<ProjectResource>("catalogapi");
 
         _app = await appHost.BuildAsync(_cancellationToken);
     }
@@ -36,6 +36,7 @@ public class ApiServiceTests : IAsyncLifetime
     public async ValueTask DisposeAsync()
     {
         await _app.DisposeAsync();
+        GC.SuppressFinalize(this); // Ensures that the finalizer is not called for this object
     }
 
     [Fact]
@@ -47,10 +48,10 @@ public class ApiServiceTests : IAsyncLifetime
         await _app.StartAsync(_cancellationToken);
 
         // Act
-        var httpClient = _app.CreateHttpClient("apiservice");
+        using var httpClient = _app.CreateHttpClient("catalogapi");
 
         await resourceNotificationService.WaitForResourceAsync(
-            "apiservice",
+            "catalogapi",
             KnownResourceStates.Running,
             _cancellationToken);
 
