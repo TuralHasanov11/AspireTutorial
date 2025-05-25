@@ -36,6 +36,8 @@ builder.AddNpgsqlDbContext<CatalogDbContext>(
 var oltpApiKey = builder.Configuration.GetValue<string>("OTLP_API_KEY");
 builder.Services.Configure<OtlpExporterOptions>(o => o.Headers = $"x-otlp-api-key={oltpApiKey}");
 
+builder.AddSeqEndpoint(connectionName: "seq");
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

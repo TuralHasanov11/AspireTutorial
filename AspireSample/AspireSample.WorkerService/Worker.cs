@@ -21,12 +21,20 @@ public class Worker(
         try
         {
             using var scope = serviceProvider.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
+            var dbContext = scope.ServiceProvider.GetService<CatalogDbContext>();
 
-            await RunMigrationAsync(dbContext, stoppingToken);
-            await SeedDataAsync(dbContext, stoppingToken);
+            if (dbContext is not null)
+            {
+                await RunMigrationAsync(dbContext, stoppingToken);
+                await SeedDataAsync(dbContext, stoppingToken);
 
-            logger.LogInformation("Database migration completed successfully.");
+                logger.LogInformation("Database migration completed successfully.");
+            }
+            else
+            {
+                logger.LogWarning("CatalogDbContext is not registered in the service provider. Migration skipped.");
+            }
+
         }
         catch (Exception ex)
         {

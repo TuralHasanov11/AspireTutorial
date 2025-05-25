@@ -7,6 +7,12 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 builder.Services.AddLifecycleHook<LifecycleLogger>();
 
+var seq = builder.AddSeq("seq")
+    .WithDataVolume()
+    .ExcludeFromManifest()
+    .WithLifetime(ContainerLifetime.Persistent)
+    .WithEnvironment("ACCEPT_EULA", "Y");
+
 var cache = builder.ExecutionContext.IsRunMode
     ? builder.AddRedis("cache")
         .WithDataVolume()
@@ -51,7 +57,9 @@ var catalogService = builder.AddProject<Projects.AspireSample_Catalog_Api>("cata
     .WithReplicas(2)
     .WaitFor(catalogDb)
     .WithReference(messaging)
-    .WaitFor(messaging);
+    .WaitFor(messaging)
+    .WithReference(seq)
+    .WaitFor(seq);
 
 
 builder.AddProject<Projects.AspireSample_Web>("webfrontend")
@@ -59,11 +67,15 @@ builder.AddProject<Projects.AspireSample_Web>("webfrontend")
     .WithReference(cache)
     .WaitFor(cache)
     .WithReference(catalogService)
-    .WaitFor(catalogService);
+    .WaitFor(catalogService)
+    .WithReference(seq)
+    .WaitFor(seq);
 
 builder.AddProject<Projects.AspireSample_WorkerService>("workerservice")
     .WithReference(catalogDb)
-    .WaitFor(catalogDb);
+    .WaitFor(catalogDb)
+    .WithReference(seq)
+    .WaitFor(seq);
 
 builder.SubsribeToHostEvents();
 
