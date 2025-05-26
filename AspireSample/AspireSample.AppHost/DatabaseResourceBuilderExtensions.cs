@@ -42,9 +42,25 @@ internal static class DatabaseResourceBuilderExtensions
     }
 
     private static async Task<ExecuteCommandResult> OnRunClearCatalogDbCommandAsync(
-        IResourceBuilder<PostgresDatabaseResource> builder,
+        IResourceBuilder<PostgresDatabaseResource> _,
         ExecuteCommandContext context)
     {
-        throw new NotImplementedException();
+        // send request to endpoint clear-db of CatalogApi resource
+
+        var httpClient = context.ServiceProvider.GetRequiredService<IHttpClientFactory>().CreateClient("catalogapi");
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/clear-db");
+
+        var response = await httpClient.SendAsync(request);
+
+        if (response.IsSuccessStatusCode)
+        {
+            return new ExecuteCommandResult { Success = true };
+        }
+        else
+        {
+            var errorMessage = await response.Content.ReadAsStringAsync(context.CancellationToken);
+            return new ExecuteCommandResult { Success = false, ErrorMessage = errorMessage };
+        }
     }
 }

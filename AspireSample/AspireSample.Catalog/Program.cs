@@ -1,5 +1,6 @@
 using AspireSample.Catalog.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Exporter;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,6 +33,8 @@ builder.AddNpgsqlDbContext<CatalogDbContext>(
                 .EnableDetailedErrors();
         }
     });
+
+//builder.AddMongoDBClient("mongo");
 
 var oltpApiKey = builder.Configuration.GetValue<string>("OTLP_API_KEY");
 builder.Services.Configure<OtlpExporterOptions>(o => o.Headers = $"x-otlp-api-key={oltpApiKey}");
@@ -71,6 +74,14 @@ app.MapPost("/cache/invalidate", static async (
     // clear cache logic here
 
     return Results.Ok();
+});
+
+// generate endpoint that will delete database
+app.MapPost("/clear-db", async (CatalogDbContext dbContext) =>
+{
+    await dbContext.Database.EnsureDeletedAsync();
+    await dbContext.Database.MigrateAsync();
+    return Results.Ok("Catalog database cleared.");
 });
 
 app.Run();

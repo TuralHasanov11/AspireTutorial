@@ -36,5 +36,15 @@ internal static class LifecycleEvents
 
                 return Task.CompletedTask;
             });
+
+        builder.Eventing.Subscribe<ResourceReadyEvent>(
+           static (@event, cancellationToken) =>
+           {
+               var logger = @event.Services.GetRequiredService<ILogger<Program>>();
+
+               logger.LogInformation("4. ResourceReadyEvent");
+
+               return Task.CompletedTask;
+           });
     }
 }

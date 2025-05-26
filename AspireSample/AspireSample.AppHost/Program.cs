@@ -28,7 +28,14 @@ builder.AddCacheEvents(cache);
 
 var messaging = builder.AddRabbitMQ("messaging");
 
-var postgres = builder.AddPostgres("postgres");
+var mongo = builder.AddMongoDB("mongo")
+    .WithLifetime(ContainerLifetime.Persistent)
+    .WithDataVolume()
+    .WithMongoExpress();
+
+var postgresPassword = builder.AddParameter("PostgresPassword", secret: true);
+var postgres = builder.AddPostgres("postgres", password: postgresPassword)
+    .WithLifetime(ContainerLifetime.Persistent);
 
 if (builder.Configuration.GetValue("UseVolumes", true))
 {

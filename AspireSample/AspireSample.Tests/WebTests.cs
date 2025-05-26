@@ -36,7 +36,7 @@ public class WebTests : IAsyncLifetime
             KnownResourceStates.Running,
             _cancellationToken);
 
-        var response = await httpClient.GetAsync("/", _cancellationToken);
+        var response = await httpClient.GetAsync(new Uri("/", UriKind.Relative), _cancellationToken);
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
