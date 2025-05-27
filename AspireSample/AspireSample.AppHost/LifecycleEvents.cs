@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-
-namespace AspireSample.AppHost;
+﻿namespace AspireSample.AppHost;
 
 internal static class LifecycleEvents
 {

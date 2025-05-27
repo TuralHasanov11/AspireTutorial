@@ -41,6 +41,8 @@ builder.Services.Configure<OtlpExporterOptions>(o => o.Headers = $"x-otlp-api-ke
 
 builder.AddSeqEndpoint(connectionName: "seq");
 
+builder.Services.AddMediator();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

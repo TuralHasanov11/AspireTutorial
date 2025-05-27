@@ -16,7 +16,7 @@ builder.Services.AddHttpClient<ApiServiceClient>((sp, client) =>
     // This URL uses "https+http://" to indicate HTTPS is preferred over HTTP.
     // Learn more about service discovery scheme resolution at https://aka.ms/dotnet/sdschemes.
 
-    var apiEndpoint = sp.GetRequiredService<IConfiguration>().GetValue<string>("ApiEndpoint");
+    var apiEndpoint = sp.GetRequiredService<IConfiguration>().GetValue<string>("CatalogApiEndpoint");
     ArgumentException.ThrowIfNullOrEmpty(apiEndpoint, nameof(apiEndpoint));
 
     client.BaseAddress = new(apiEndpoint);

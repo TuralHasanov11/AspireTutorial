@@ -1,5 +1,4 @@
 using Aspire.Hosting.Lifecycle;
-using Microsoft.Extensions.Logging;
 
 namespace AspireSample.AppHost;
 

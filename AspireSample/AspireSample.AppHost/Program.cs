@@ -1,18 +1,18 @@
 using Aspire.Hosting.Lifecycle;
-using AspireSample.AppHost;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
 builder.Services.AddLifecycleHook<LifecycleLogger>();
 
+#region Seq
 var seq = builder.AddSeq("seq")
     .WithDataVolume()
     .ExcludeFromManifest()
     .WithLifetime(ContainerLifetime.Persistent)
     .WithEnvironment("ACCEPT_EULA", "Y");
+#endregion
 
+#region Redis
 var cache = builder.ExecutionContext.IsRunMode
     ? builder.AddRedis("cache")
         .WithDataVolume()
@@ -25,30 +25,37 @@ var cache = builder.ExecutionContext.IsRunMode
     : builder.AddConnectionString("cache");
 
 builder.AddCacheEvents(cache);
+#endregion
 
-var messaging = builder.AddRabbitMQ("messaging");
+#region RabbitMQ
+var messaging = builder.AddRabbitMQ("messaging")
+    .WithLifetime(ContainerLifetime.Persistent);
+#endregion
 
+#region MongoDB
 var mongo = builder.AddMongoDB("mongo")
     .WithLifetime(ContainerLifetime.Persistent)
     .WithDataVolume()
     .WithMongoExpress();
+#endregion
 
+#region PostgresSQL
 var postgresPassword = builder.AddParameter("PostgresPassword", secret: true);
 var postgres = builder.AddPostgres("postgres", password: postgresPassword)
-    .WithLifetime(ContainerLifetime.Persistent);
-
-if (builder.Configuration.GetValue("UseVolumes", true))
-{
-    postgres.WithDataVolume()
-        .WithPgAdmin(resource =>
-        {
-            resource.WithUrlForEndpoint("https", u => u.DisplayText = "PG Admin");
-        });
-}
+    .WithLifetime(ContainerLifetime.Persistent)
+    .WithDataVolume()
+    .WithPgAdmin(resource =>
+    {
+        resource.WithUrlForEndpoint("https", u => u.DisplayText = "PG Admin")
+            .WithImagePullPolicy(ImagePullPolicy.Always)
+            .WithLifetime(ContainerLifetime.Persistent);
+    });
 
 var catalogDb = postgres.AddDatabase("catalogdb")
     .WithClearCommand();
+#endregion
 
+#region Catalog Service
 var apiCacheInvalidationKey = builder.AddParameter("ApiCacheInvalidationKey", secret: true);
 
 var catalogService = builder.AddProject<Projects.AspireSample_Catalog_Api>("catalogapi")
@@ -67,8 +74,9 @@ var catalogService = builder.AddProject<Projects.AspireSample_Catalog_Api>("cata
     .WaitFor(messaging)
     .WithReference(seq)
     .WaitFor(seq);
+#endregion
 
-
+#region WebApp
 builder.AddProject<Projects.AspireSample_Web>("webfrontend")
     .WithExternalHttpEndpoints()
     .WithReference(cache)
@@ -77,12 +85,15 @@ builder.AddProject<Projects.AspireSample_Web>("webfrontend")
     .WaitFor(catalogService)
     .WithReference(seq)
     .WaitFor(seq);
+#endregion
 
+#region Worker Service
 builder.AddProject<Projects.AspireSample_WorkerService>("workerservice")
     .WithReference(catalogDb)
     .WaitFor(catalogDb)
     .WithReference(seq)
     .WaitFor(seq);
+#endregion
 
 builder.SubsribeToHostEvents();
 

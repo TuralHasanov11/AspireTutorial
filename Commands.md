@@ -5,5 +5,5 @@ docker network ls --format "{{.Name}}" | Where-Object { $_ -like "default-aspire
 ```
 
 ```sh
-dotnet run -- --publisher manifest --output-path ../aspire-manifest.json
+dotnet run --publisher manifest --output-path ../aspire-manifest.json
 ```
