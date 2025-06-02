@@ -4,6 +4,14 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 builder.Services.AddLifecycleHook<LifecycleLogger>();
 
+var username = builder.AddParameter("KeycloakUsername");
+var password = builder.AddParameter("KeycloakPassword", secret: true);
+var keycloak = builder.AddKeycloak("keycloak", 8080, username, password)
+    .WithDataVolume()
+    //.WithRealmImport("./Realms");
+    .WithLifetime(ContainerLifetime.Persistent)
+    .WithExternalHttpEndpoints();
+
 #region Seq
 var seq = builder.AddSeq("seq")
     .WithDataVolume()
@@ -11,6 +19,8 @@ var seq = builder.AddSeq("seq")
     .WithLifetime(ContainerLifetime.Persistent)
     .WithEnvironment("ACCEPT_EULA", "Y");
 #endregion
+
+var av = builder.AddClamAv("antivirus");
 
 #region Redis
 var cache = builder.ExecutionContext.IsRunMode
@@ -73,7 +83,9 @@ var catalogService = builder.AddProject<Projects.AspireSample_Catalog_Api>("cata
     .WithReference(messaging)
     .WaitFor(messaging)
     .WithReference(seq)
-    .WaitFor(seq);
+    .WaitFor(seq)
+    .WithReference(keycloak)
+    .WaitFor(keycloak);
 #endregion
 
 #region WebApp
@@ -84,7 +96,10 @@ builder.AddProject<Projects.AspireSample_Web>("webfrontend")
     .WithReference(catalogService)
     .WaitFor(catalogService)
     .WithReference(seq)
-    .WaitFor(seq);
+    .WaitFor(seq)
+    .WithReference(keycloak)
+    .WaitFor(keycloak)
+    .WithReference(av);
 #endregion
 
 #region Worker Service

@@ -1,4 +1,5 @@
 using AspireSample.Catalog.Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Exporter;
@@ -43,6 +44,26 @@ builder.AddSeqEndpoint(connectionName: "seq");
 
 builder.Services.AddMediator();
 
+builder.Services.AddAuthentication()
+    .AddKeycloakJwtBearer(
+        serviceName: "keycloak",
+        realm: "AspireSample",
+        options =>
+        {
+            options.Audience = "account";
+            options.RequireHttpsMetadata = false;
+        });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.DefaultPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .RequireClaim("scope", "catalog:read-write")
+        .Build();
+
+    options.FallbackPolicy = options.DefaultPolicy;
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -57,11 +78,14 @@ app.UseRequestTimeouts();
 
 app.UseOutputCache();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapDefaultEndpoints();
 
 app.MapGet("/", () => "Catalog Api");
 
-app.MapPost("/cache/invalidate", static async (
+app.MapPost("/cache/invalidate", static (
     [FromHeader(Name = "X-CacheInvalidation-Key")] string? header,
     IConfiguration config) =>
 {

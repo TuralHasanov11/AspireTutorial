@@ -1,4 +1,9 @@
+using AspireSample.Web.Identity;
 using AspireSample.Web.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using OpenTelemetry.Exporter;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,19 +18,40 @@ builder.Services.AddRazorPages();
 
 builder.Services.AddHttpClient<ApiServiceClient>((sp, client) =>
 {
-    // This URL uses "https+http://" to indicate HTTPS is preferred over HTTP.
-    // Learn more about service discovery scheme resolution at https://aka.ms/dotnet/sdschemes.
-
     var apiEndpoint = sp.GetRequiredService<IConfiguration>().GetValue<string>("CatalogApiEndpoint");
     ArgumentException.ThrowIfNullOrEmpty(apiEndpoint, nameof(apiEndpoint));
 
     client.BaseAddress = new(apiEndpoint);
-});
+}).AddHttpMessageHandler<AccessTokenDelegatingHandler>();
 
 var oltpApiKey = builder.Configuration.GetValue<string>("OTLP_API_KEY");
 builder.Services.Configure<OtlpExporterOptions>(o => o.Headers = $"x-otlp-api-key={oltpApiKey}");
 
 builder.AddRedisOutputCache("cache");
+
+builder.Services.AddHttpContextAccessor()
+    .AddTransient<AccessTokenDelegatingHandler>();
+
+builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+    .AddKeycloakOpenIdConnect(
+        serviceName: "keycloak",
+        realm: "AspireSample",
+        OpenIdConnectDefaults.AuthenticationScheme,
+        options =>
+        {
+            options.ClientId = "AspireSampleWeb";
+            options.ResponseType = OpenIdConnectResponseType.Code;
+            options.Scope.Add("catalog:read-write");
+            options.RequireHttpsMetadata = false;
+            options.TokenValidationParameters.NameClaimType = JwtRegisteredClaimNames.Name;
+            options.SaveTokens = true;
+            options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        })
+    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
+
+builder.Services.AddCascadingAuthenticationState();
+
+builder.Services.AddTransient<IAntiVirusService, AntiVirusService>();
 
 var app = builder.Build();
 
@@ -50,6 +76,9 @@ app.UseAuthorization();
 app.MapStaticAssets();
 app.MapRazorPages()
    .WithStaticAssets();
+
+app.MapIdentityEndpoints();
+app.MapIdentityApiEndpoints();
 
 app.MapGet("/apiservice", async (ApiServiceClient client) =>
 {
