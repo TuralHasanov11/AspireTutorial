@@ -112,4 +112,17 @@ builder.AddProject<Projects.AspireSample_WorkerService>("workerservice")
 
 builder.SubsribeToHostEvents();
 
+
+//builder.AddProject<Projects.ReactApp_Bff>("reactapp-bff")
+//    .WithExternalHttpEndpoints()
+//    .WithReference(seq)
+//    .WaitFor(seq);
+
+builder.AddNpmApp("reactappclient", "../reactapp.client")
+    .WithEnvironment("BROWSER", "none")
+    .WithHttpEndpoint(env: "VITE_PORT")
+    .WithExternalHttpEndpoints()
+    .PublishAsDockerFile();
+
+
 builder.Build().Run();

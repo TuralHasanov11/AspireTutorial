@@ -110,4 +110,10 @@ app.MapPost("/clear-db", async (CatalogDbContext dbContext) =>
     return Results.Ok("Catalog database cleared.");
 });
 
+app.MapPost("idempotency", ([FromHeader(Name = "X-Idempotency-Key")] string requestId) =>
+{
+    Console.WriteLine($"Received idempotency request with ID: {requestId}");
+    return Results.Ok();
+});
+
 app.Run();
