@@ -15,7 +15,6 @@
     <ProjectReference Include="..\AspireSample.Catalog\AspireSample.Catalog.Api.csproj" />
     <ProjectReference Include="..\AspireSample.Web\AspireSample.Web.csproj" />
     <ProjectReference Include="..\AspireSample.WorkerService\AspireSample.WorkerService.csproj" />
-    <ProjectReference Include="..\ReactApp.Bff\ReactApp.Bff.csproj" />
   </ItemGroup>
 
   <ItemGroup>

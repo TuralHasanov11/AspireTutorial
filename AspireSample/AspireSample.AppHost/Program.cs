@@ -20,11 +20,12 @@ var seq = builder.AddSeq("seq")
     .WithEnvironment("ACCEPT_EULA", "Y");
 #endregion
 
-var av = builder.AddClamAv("antivirus");
+//var av = builder.AddClamAv("antivirus");
 
 #region Redis
 var cache = builder.ExecutionContext.IsRunMode
     ? builder.AddRedis("cache")
+        .WithLifetime(ContainerLifetime.Persistent)
         .WithDataVolume()
         .WithPersistence(
             interval: TimeSpan.FromMinutes(5),
@@ -98,8 +99,7 @@ builder.AddProject<Projects.AspireSample_Web>("webfrontend")
     .WithReference(seq)
     .WaitFor(seq)
     .WithReference(keycloak)
-    .WaitFor(keycloak)
-    .WithReference(av);
+    .WaitFor(keycloak);
 #endregion
 
 #region Worker Service
@@ -113,13 +113,13 @@ builder.AddProject<Projects.AspireSample_WorkerService>("workerservice")
 builder.SubsribeToHostEvents();
 
 
-//builder.AddProject<Projects.ReactApp_Bff>("reactapp-bff")
-//    .WithExternalHttpEndpoints()
-//    .WithReference(seq)
-//    .WaitFor(seq);
+builder.AddNpmApp("reactappclient", "../reactapp.client", "dev")
+    .WithEnvironment("BROWSER", "none") // Disable opening browser on npm start
+    .WithHttpEndpoint(env: "VITE_PORT")
+    .WithExternalHttpEndpoints()
+    .PublishAsDockerFile();
 
-builder.AddNpmApp("reactappclient", "../reactapp.client")
-    .WithEnvironment("BROWSER", "none")
+builder.AddNpmApp("vueappclient", "../vueapp.client", "dev")
     .WithHttpEndpoint(env: "VITE_PORT")
     .WithExternalHttpEndpoints()
     .PublishAsDockerFile();

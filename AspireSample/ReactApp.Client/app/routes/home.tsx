@@ -8,20 +8,6 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export async function loader() {
-  return { message: "Welcome Message" };
-}
-
-export async function action({request} : Route.ActionArgs) {
-  const formData = await request.formData();
-  console.info("Form Data Received:", formData);
-}
-
-export default function Home({
-  loaderData,
-  actionData,
-  params,
-  matches,
-}: Route.ComponentProps) {
+export default function Home() {
   return <Welcome />;
 }

@@ -49,10 +49,10 @@ npm run build
 To build and run using Docker:
 
 ```bash
-docker build -t reactapp-client:latest .
+docker build -t my-app .
 
 # Run the container
-docker run -p 3000:3000 reactapp-client
+docker run -p 3000:3000 my-app
 ```
 
 The containerized application can be deployed to any platform that supports Docker, including:
@@ -85,3 +85,5 @@ This template comes with [Tailwind CSS](https://tailwindcss.com/) already config
 ---
 
 Built with ❤️ using React Router.
+
+

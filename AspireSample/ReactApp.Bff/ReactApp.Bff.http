@@ -1,6 +1,0 @@
-@ReactApp.Bff_HostAddress = http://localhost:5122
-
-GET {{ReactApp.Bff_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

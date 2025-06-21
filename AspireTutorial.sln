@@ -29,10 +29,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspireSample.Catalog.Infras
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedKernel", "AspireSample\SharedKernel\SharedKernel.csproj", "{C2D57B7B-7E1E-40BA-BC9A-8DA335422F8E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReactApp.Bff", "AspireSample\ReactApp.Bff\ReactApp.Bff.csproj", "{512D6AFB-545C-3B70-5411-E5B4137B1A02}"
-EndProject
-Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "reactapp.client", "AspireSample\reactapp.client\reactapp.client.esproj", "{84658518-868C-5C59-7235-D79B80271881}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,16 +67,6 @@ Global
 		{C2D57B7B-7E1E-40BA-BC9A-8DA335422F8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2D57B7B-7E1E-40BA-BC9A-8DA335422F8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2D57B7B-7E1E-40BA-BC9A-8DA335422F8E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{512D6AFB-545C-3B70-5411-E5B4137B1A02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{512D6AFB-545C-3B70-5411-E5B4137B1A02}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{512D6AFB-545C-3B70-5411-E5B4137B1A02}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{512D6AFB-545C-3B70-5411-E5B4137B1A02}.Release|Any CPU.Build.0 = Release|Any CPU
-		{84658518-868C-5C59-7235-D79B80271881}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{84658518-868C-5C59-7235-D79B80271881}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{84658518-868C-5C59-7235-D79B80271881}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{84658518-868C-5C59-7235-D79B80271881}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{84658518-868C-5C59-7235-D79B80271881}.Release|Any CPU.Build.0 = Release|Any CPU
-		{84658518-868C-5C59-7235-D79B80271881}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -94,8 +80,6 @@ Global
 		{B5F1F48F-0B2C-43C5-A4B0-43947A156027} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{6792A40E-130E-47B4-A6A3-8BA101F26956} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{C2D57B7B-7E1E-40BA-BC9A-8DA335422F8E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{512D6AFB-545C-3B70-5411-E5B4137B1A02} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{84658518-868C-5C59-7235-D79B80271881} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4B9023DE-E3D7-4F6E-86B1-759E0177E3AB}
