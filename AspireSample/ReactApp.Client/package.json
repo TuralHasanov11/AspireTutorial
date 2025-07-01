@@ -6,7 +6,9 @@
     "start": "react-router-serve ./build/server/index.js",
     "build": "react-router build",
     "dev": "react-router dev",
-    "typecheck": "react-router typegen && tsc"
+    "typecheck": "react-router typegen && tsc",
+    "lint": "eslint --ext .js,.tsx,.ts,.jsx --ignore-path .gitignore --fix app",
+    "format": "prettier .  --write"
   },
   "dependencies": {
     "@react-router/node": "^7.5.3",
@@ -22,6 +24,10 @@
     "@types/node": "^20",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
+    "eslint": "^9.30.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.5.1",
+    "prettier": "^3.6.2",
     "tailwindcss": "^4.1.4",
     "typescript": "^5.8.3",
     "vite": "^6.3.3",
