@@ -18,7 +18,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 		aspire-manifest.json = aspire-manifest.json
 		Commands.md = Commands.md
-		copilot-instructions.md = copilot-instructions.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspireSample.WorkerService", "AspireSample\AspireSample.WorkerService\AspireSample.WorkerService.csproj", "{0DE613E4-238E-4F7A-96FA-25B79B33AB7B}"
@@ -28,6 +27,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspireSample.Catalog.Infrastructure", "AspireSample\AspireSample.Catalog.Infrastructure\AspireSample.Catalog.Infrastructure.csproj", "{6792A40E-130E-47B4-A6A3-8BA101F26956}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedKernel", "AspireSample\SharedKernel\SharedKernel.csproj", "{C2D57B7B-7E1E-40BA-BC9A-8DA335422F8E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AiChatApp", "AspireSample\AiChatApp\AiChatApp.csproj", "{DE1C554C-421B-A74D-B3B8-BEC6C2563685}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -67,6 +68,10 @@ Global
 		{C2D57B7B-7E1E-40BA-BC9A-8DA335422F8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2D57B7B-7E1E-40BA-BC9A-8DA335422F8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2D57B7B-7E1E-40BA-BC9A-8DA335422F8E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE1C554C-421B-A74D-B3B8-BEC6C2563685}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE1C554C-421B-A74D-B3B8-BEC6C2563685}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE1C554C-421B-A74D-B3B8-BEC6C2563685}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE1C554C-421B-A74D-B3B8-BEC6C2563685}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -80,6 +85,7 @@ Global
 		{B5F1F48F-0B2C-43C5-A4B0-43947A156027} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{6792A40E-130E-47B4-A6A3-8BA101F26956} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{C2D57B7B-7E1E-40BA-BC9A-8DA335422F8E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{DE1C554C-421B-A74D-B3B8-BEC6C2563685} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4B9023DE-E3D7-4F6E-86B1-759E0177E3AB}

@@ -12,6 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AiChatApp\AiChatApp.csproj" />
     <ProjectReference Include="..\AspireSample.Catalog\AspireSample.Catalog.Api.csproj" />
     <ProjectReference Include="..\AspireSample.Web\AspireSample.Web.csproj" />
     <ProjectReference Include="..\AspireSample.WorkerService\AspireSample.WorkerService.csproj" />
@@ -26,6 +27,7 @@
     <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="9.3.0" />
     <PackageReference Include="Aspire.Hosting.Redis" Version="9.3.0" />
     <PackageReference Include="Aspire.Hosting.Seq" Version="9.3.0" />
+    <PackageReference Include="CommunityToolkit.Aspire.Hosting.Ollama" Version="9.6.0" />
   </ItemGroup>
 
     <Target Name="RestoreNpm" BeforeTargets="Build" Condition=" '$(DesignTimeBuild)' != 'true' ">

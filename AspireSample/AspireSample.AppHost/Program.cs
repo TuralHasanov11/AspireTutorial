@@ -12,6 +12,10 @@ var keycloak = builder.AddKeycloak("keycloak", 8080, username, password)
     .WithLifetime(ContainerLifetime.Persistent)
     .WithExternalHttpEndpoints();
 
+//var ollama = builder.AddOllama("ollama")
+//    .WithOpenWebUI();
+//var gemma3_1b = ollama.AddModel("gemma3:1b");
+
 #region Seq
 var seq = builder.AddSeq("seq")
     .WithDataVolume()
@@ -30,7 +34,7 @@ var cache = builder.ExecutionContext.IsRunMode
         .WithPersistence(
             interval: TimeSpan.FromMinutes(5),
             keysChangedThreshold: 100)
-        .WithImageTag("latest")
+        //.WithImageTag("latest")
         .WithRedisInsight()
         .WithClearCommand()
     : builder.AddConnectionString("cache");
@@ -58,7 +62,7 @@ var postgres = builder.AddPostgres("postgres", password: postgresPassword)
     .WithPgAdmin(resource =>
     {
         resource.WithUrlForEndpoint("https", u => u.DisplayText = "PG Admin")
-            .WithImagePullPolicy(ImagePullPolicy.Always)
+            //.WithImagePullPolicy(ImagePullPolicy.Always)
             .WithLifetime(ContainerLifetime.Persistent);
     });
 
@@ -125,4 +129,16 @@ builder.AddNpmApp("vueappclient", "../vueapp.client", "dev")
     .PublishAsDockerFile();
 
 
-builder.Build().Run();
+builder.AddProject<Projects.AiChatApp>("aichatapp")
+    .WithExternalHttpEndpoints()
+    .WithReference(cache)
+    .WaitFor(cache)
+    .WithReference(catalogService)
+    .WaitFor(catalogService)
+    .WithReference(seq)
+    .WaitFor(seq)
+    .WithReference(keycloak)
+    .WaitFor(keycloak);
+
+
+await builder.Build().RunAsync();
