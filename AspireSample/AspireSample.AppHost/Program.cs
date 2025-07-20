@@ -141,4 +141,15 @@ builder.AddProject<Projects.AiChatApp>("aichatapp")
     .WaitFor(keycloak);
 
 
+//builder.AddAzureContainerAppEnvironment("myEnv");
+
+//var myAppStorage = builder.AddAzureStorage("myAppStorage");
+//var queues = myAppStorage.AddQueues("queues");
+
+
+builder.AddAzureFunctionsProject<Projects.AspireSample_FunctionApp1>("functionapp1");
+//.WithHostStorage(myAppStorage)
+//.WithReference(queues, "MyQueueTriggerConnection")
+//.WithRoleAssignments(myAppStorage, StorageBuiltInRole.StorageBlobDataOwner);
+
 await builder.Build().RunAsync();
