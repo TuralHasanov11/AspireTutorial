@@ -1,4 +1,5 @@
 using AspireSample.Catalog.Infrastructure.Data;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -64,6 +65,8 @@ builder.Services.AddAuthorization(options =>
     options.FallbackPolicy = options.DefaultPolicy;
 });
 
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -116,4 +119,4 @@ app.MapPost("idempotency", ([FromHeader(Name = "X-Idempotency-Key")] string requ
     return Results.Ok();
 });
 
-app.Run();
+await app.RunAsync();
