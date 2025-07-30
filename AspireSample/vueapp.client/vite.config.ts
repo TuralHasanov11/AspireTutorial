@@ -21,7 +21,7 @@ export default defineConfig({
         target:
           process.env.services__catalogapi__https__0 || process.env.services__catalogapi__http__0,
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
+        rewrite: (path) => path.replace(/^\/api\/catalog/, '/api'),
         secure: false,
       },
     },

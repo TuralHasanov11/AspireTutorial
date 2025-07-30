@@ -108,30 +108,32 @@ builder.AddProject<Projects.AspireSample_WorkerService>("workerservice")
 
 
 
-//builder.AddNpmApp("reactappclient", "../reactapp.client", "dev")
-//    .WithEnvironment("BROWSER", "none") // Disable opening browser on npm start
-//    .WithHttpEndpoint(env: "VITE_PORT")
-//    .WithExternalHttpEndpoints()
-//    .PublishAsDockerFile();
+builder.AddNpmApp("reactappclient", "../ReactApp.Client", "dev")
+    .WithReference(catalogService)
+    .WithEnvironment("BROWSER", "none") // Disable opening browser on npm start
+    .WithHttpEndpoint(env: "VITE_PORT")
+    .WithExternalHttpEndpoints()
+    .PublishAsDockerFile();
 
 builder.AddNpmApp("vueappclient", "../vueapp.client", "dev")
     .WithReference(catalogService)
-    .WaitFor(catalogService)
     .WithHttpEndpoint(env: "VITE_PORT")
     .WithExternalHttpEndpoints()
     .PublishAsDockerFile();
 
 
-builder.AddProject<Projects.AiChatApp>("aichatapp")
-    .WithExternalHttpEndpoints()
-    .WithReference(cache)
-    .WaitFor(cache)
-    .WithReference(catalogService)
-    .WaitFor(catalogService)
-    .WithReference(seq)
-    .WaitFor(seq)
-    .WithReference(keycloak)
-    .WaitFor(keycloak);
+//builder.AddProject<Projects.AiChatApp>("aichatapp")
+//    .WithExternalHttpEndpoints()
+//    .WithReference(ollama)
+//    .WaitFor(ollama)
+//    .WithReference(cache)
+//    .WaitFor(cache)
+//    .WithReference(catalogService)
+//    .WaitFor(catalogService)
+//    .WithReference(seq)
+//    .WaitFor(seq)
+//    .WithReference(keycloak)
+//    .WaitFor(keycloak);
 
 
 //builder.AddAzureContainerAppEnvironment("myEnv");

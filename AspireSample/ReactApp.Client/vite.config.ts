@@ -10,12 +10,12 @@ export default defineConfig({
     port: parseInt(process.env.VITE_PORT ?? "3000"),
     allowedHosts: true,
     proxy: {
-      "/api": {
+      "/api/catalog": {
         target:
           process.env.services__catalogapi__https__0 ||
           process.env.services__catalogapi__http__0,
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""),
+        rewrite: (path) => path.replace(/^\/api\/catalog/, "/api"),
         secure: false,
       },
     },
