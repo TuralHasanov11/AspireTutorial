@@ -86,7 +86,7 @@ app.UseAuthorization();
 
 app.MapDefaultEndpoints();
 
-app.MapGet("/", () => "Catalog Api");
+app.MapGet("/api", () => "Catalog Api").AllowAnonymous();
 
 app.MapPost("/cache/invalidate", static (
     [FromHeader(Name = "X-CacheInvalidation-Key")] string? header,

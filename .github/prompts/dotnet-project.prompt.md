@@ -11,6 +11,7 @@ Ask for the specific features or areas of the codebase to focus on if not provid
 
 Requirements for the project:
 
+- Use Default Service Provider to validate scopes on build
 - Ensures that the DI container validates the service configuration when the application is built
 - Enable Configuration Binding Generator
 - (Server: Kestrel) is removed from the HTTP responses

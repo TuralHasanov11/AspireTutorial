@@ -6,6 +6,13 @@ using OllamaSharp;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Host.UseDefaultServiceProvider(config =>
+{
+    config.ValidateOnBuild = true;
+    config.ValidateScopes = true;
+});
+builder.WebHost.UseKestrel(options => options.AddServerHeader = false);
+
 builder.AddServiceDefaults();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 

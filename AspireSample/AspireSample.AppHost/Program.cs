@@ -4,6 +4,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 builder.Services.AddLifecycleHook<LifecycleLogger>();
 
+
 var username = builder.AddParameter("KeycloakUsername");
 var password = builder.AddParameter("KeycloakPassword", secret: true);
 var keycloak = builder.AddKeycloak("keycloak", 8080, username, password)
@@ -12,21 +13,21 @@ var keycloak = builder.AddKeycloak("keycloak", 8080, username, password)
     .WithLifetime(ContainerLifetime.Persistent)
     .WithExternalHttpEndpoints();
 
-//var ollama = builder.AddOllama("ollama")
-//    .WithOpenWebUI();
-//var gemma3_1b = ollama.AddModel("gemma3:1b");
 
-#region Seq
+var ollama = builder.AddOllama("ollama")
+    .WithOpenWebUI();
+var gemma3_1b = ollama.AddModel("gemma3:1b");
+
+
 var seq = builder.AddSeq("seq")
     .WithDataVolume()
     .ExcludeFromManifest()
     .WithLifetime(ContainerLifetime.Persistent)
     .WithEnvironment("ACCEPT_EULA", "Y");
-#endregion
 
-//var av = builder.AddClamAv("antivirus");
 
-#region Redis
+var av = builder.AddClamAv("antivirus");
+
 var cache = builder.ExecutionContext.IsRunMode
     ? builder.AddRedis("cache")
         .WithLifetime(ContainerLifetime.Persistent)
@@ -40,21 +41,18 @@ var cache = builder.ExecutionContext.IsRunMode
     : builder.AddConnectionString("cache");
 
 builder.AddCacheEvents(cache);
-#endregion
 
-#region RabbitMQ
+
 var messaging = builder.AddRabbitMQ("messaging")
     .WithLifetime(ContainerLifetime.Persistent);
-#endregion
 
-#region MongoDB
+
 var mongo = builder.AddMongoDB("mongo")
     .WithLifetime(ContainerLifetime.Persistent)
     .WithDataVolume()
     .WithMongoExpress();
-#endregion
 
-#region PostgresSQL
+
 var postgresPassword = builder.AddParameter("PostgresPassword", secret: true);
 var postgres = builder.AddPostgres("postgres", password: postgresPassword)
     .WithLifetime(ContainerLifetime.Persistent)
@@ -66,13 +64,11 @@ var postgres = builder.AddPostgres("postgres", password: postgresPassword)
             .WithLifetime(ContainerLifetime.Persistent);
     });
 
+
 var catalogDb = postgres.AddDatabase("catalogdb")
     .WithClearCommand();
-#endregion
 
-#region Catalog Service
 var apiCacheInvalidationKey = builder.AddParameter("ApiCacheInvalidationKey", secret: true);
-
 var catalogService = builder.AddProject<Projects.AspireSample_Catalog_Api>("catalogapi")
     .WithExternalHttpEndpoints()
     .WithUrlForEndpoint("https", url =>
@@ -91,9 +87,8 @@ var catalogService = builder.AddProject<Projects.AspireSample_Catalog_Api>("cata
     .WaitFor(seq)
     .WithReference(keycloak)
     .WaitFor(keycloak);
-#endregion
 
-#region WebApp
+
 builder.AddProject<Projects.AspireSample_Web>("webfrontend")
     .WithExternalHttpEndpoints()
     .WithReference(cache)
@@ -104,26 +99,24 @@ builder.AddProject<Projects.AspireSample_Web>("webfrontend")
     .WaitFor(seq)
     .WithReference(keycloak)
     .WaitFor(keycloak);
-#endregion
 
-#region Worker Service
 builder.AddProject<Projects.AspireSample_WorkerService>("workerservice")
     .WithReference(catalogDb)
     .WaitFor(catalogDb)
     .WithReference(seq)
     .WaitFor(seq);
-#endregion
-
-builder.SubsribeToHostEvents();
 
 
-builder.AddNpmApp("reactappclient", "../reactapp.client", "dev")
-    .WithEnvironment("BROWSER", "none") // Disable opening browser on npm start
-    .WithHttpEndpoint(env: "VITE_PORT")
-    .WithExternalHttpEndpoints()
-    .PublishAsDockerFile();
+
+//builder.AddNpmApp("reactappclient", "../reactapp.client", "dev")
+//    .WithEnvironment("BROWSER", "none") // Disable opening browser on npm start
+//    .WithHttpEndpoint(env: "VITE_PORT")
+//    .WithExternalHttpEndpoints()
+//    .PublishAsDockerFile();
 
 builder.AddNpmApp("vueappclient", "../vueapp.client", "dev")
+    .WithReference(catalogService)
+    .WaitFor(catalogService)
     .WithHttpEndpoint(env: "VITE_PORT")
     .WithExternalHttpEndpoints()
     .PublishAsDockerFile();
@@ -143,13 +136,17 @@ builder.AddProject<Projects.AiChatApp>("aichatapp")
 
 //builder.AddAzureContainerAppEnvironment("myEnv");
 
+
 //var myAppStorage = builder.AddAzureStorage("myAppStorage");
 //var queues = myAppStorage.AddQueues("queues");
 
 
-builder.AddAzureFunctionsProject<Projects.AspireSample_FunctionApp1>("functionapp1");
+//builder.AddAzureFunctionsProject<Projects.AspireSample_FunctionApp1>("functionapp1");
 //.WithHostStorage(myAppStorage)
 //.WithReference(queues, "MyQueueTriggerConnection")
 //.WithRoleAssignments(myAppStorage, StorageBuiltInRole.StorageBlobDataOwner);
+
+
+builder.SubsribeToHostEvents();
 
 await builder.Build().RunAsync();

@@ -65,6 +65,8 @@ public static class Extensions
         builder.Services.AddExceptionHandler<ProblemExceptionHandler>();
         builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
 
+        builder.Services.Configure<HostOptions>(builder.Configuration.GetSection("Host"));
+
         return builder;
     }
 
