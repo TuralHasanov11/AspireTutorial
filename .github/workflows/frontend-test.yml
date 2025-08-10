@@ -1,0 +1,94 @@
+name: Frontend Test
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-test-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: ${{ matrix.app.name }} (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20]
+        app:
+          - name: vueapp.client
+            path: AspireSample/vueapp.client
+            e2e: true
+          - name: ReactApp.Client
+            path: AspireSample/ReactApp.Client
+            e2e: false
+          # - name: nextapp
+          #   path: AspireSample/nextapp
+          #   e2e: false
+          # - name: nuxtapp
+          #   path: AspireSample/nuxtapp
+          #   e2e: false
+
+    defaults:
+      run:
+        working-directory: ${{ matrix.app.path }}
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: ${{ matrix.app.path }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint --if-present
+
+      - name: Type Check
+        run: |
+          npm run type-check --if-present || npm run typecheck --if-present
+
+      - name: Unit tests (with coverage if configured)
+        run: |
+          npm run coverage --if-present || npm test --if-present || npm run test:unit --if-present
+
+      # - name: Install Playwright browsers (only for apps with e2e)
+      #   if: ${{ matrix.app.e2e == true }}
+      #   run: npx --yes playwright install --with-deps
+
+      # - name: E2E tests (Playwright)
+      #   if: ${{ matrix.app.e2e == true }}
+      #   run: npx playwright test --reporter=line
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.app.name }}-${{ github.run_id }}
+          path: |
+            ${{ matrix.app.path }}/coverage
+            ${{ matrix.app.path }}/coverage/**/*
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload coverage to Codecov
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ${{ matrix.app.path }}/coverage
+          flags: ${{ matrix.app.name }}
+          name: ${{ matrix.app.name }}-${{ github.run_id }}
+          fail_ci_if_error: true
