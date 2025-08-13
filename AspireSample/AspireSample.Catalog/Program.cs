@@ -1,3 +1,5 @@
+using AspireSample.Catalog.Api.Features;
+using AspireSample.Catalog.Api.Features.Products;
 using AspireSample.Catalog.Infrastructure.Data;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
@@ -67,6 +69,9 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ILinkService, LinkService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -118,5 +123,8 @@ app.MapPost("idempotency", ([FromHeader(Name = "X-Idempotency-Key")] string requ
     Console.WriteLine($"Received idempotency request with ID: {requestId}");
     return Results.Ok();
 });
+
+// Register Product endpoints
+app.MapProductEndpoints();
 
 await app.RunAsync();
