@@ -74,7 +74,7 @@ var catalogService = builder.AddProject<Projects.AspireSample_Catalog_Api>("cata
     .WithUrlForEndpoint("https", url =>
     {
         url.DisplayText = "Scalar (HTTPS)";
-        url.Url += "/scalar";
+        url.Url += "/scalar/v1";
     })
     .WithEnvironment("API_CACHE_INVALIDATION_KEY", apiCacheInvalidationKey)
     .WithClearCache(apiCacheInvalidationKey)

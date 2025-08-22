@@ -1,3 +1,4 @@
+using System.Net;
 using AspireSample.Catalog.Api.Features;
 using AspireSample.Catalog.Api.Features.Products;
 using AspireSample.Catalog.Infrastructure.Data;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Exporter;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -79,7 +81,8 @@ app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.MapOpenApi().AllowAnonymous();
+    app.MapScalarApiReference().AllowAnonymous();
 }
 
 app.UseRequestTimeouts();
@@ -108,7 +111,13 @@ app.MapPost("/cache/invalidate", static (
     // clear cache logic here
 
     return Results.Ok();
-});
+})
+    .WithSummary("Invalidate API Cache")
+    .WithDescription("Invalidates the API cache. Requires a valid X-CacheInvalidation-Key header.")
+    .WithTags("cache")
+    .WithName("InvalidateApiCache")
+    .Produces(StatusCodes.Status200OK)
+    .Produces(StatusCodes.Status401Unauthorized);
 
 // generate endpoint that will delete database
 app.MapPost("/clear-db", async (CatalogDbContext dbContext) =>
