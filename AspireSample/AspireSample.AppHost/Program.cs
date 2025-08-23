@@ -90,6 +90,11 @@ var catalogService = builder.AddProject<Projects.AspireSample_Catalog_Api>("cata
 
 builder.AddProject<Projects.AspireSample_Web>("webfrontend")
     .WithExternalHttpEndpoints()
+    .WithUrlForEndpoint("https", url =>
+    {
+        url.DisplayText = "Scalar (HTTPS)";
+        url.Url += "/scalar/v1";
+    })
     .WithReference(cache)
     .WaitFor(cache)
     .WithReference(catalogService)
