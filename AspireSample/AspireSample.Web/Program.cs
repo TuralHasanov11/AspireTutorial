@@ -70,6 +70,18 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddCascadingAuthenticationState();
 
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddOptions<OpenApiInfo>()
+    .BindConfiguration("OpenApiInfo")
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer<OpenApiInfoTransformer>();
+    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+});
+
 builder.Services.AddTransient<IAntiVirusService, AntiVirusService>();
 
 var app = builder.Build();
@@ -82,6 +94,12 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+}
+
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi().AllowAnonymous();
+    app.MapScalarApiReference().AllowAnonymous();
 }
 
 app.UseHttpsRedirection();

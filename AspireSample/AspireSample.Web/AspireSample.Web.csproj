@@ -4,6 +4,8 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <OpenApiDocumentsDirectory>.</OpenApiDocumentsDirectory>
+    <OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,6 +13,12 @@
     <PackageReference Include="Aspire.Keycloak.Authentication" Version="9.3.0-preview.1.25265.20" />
     <PackageReference Include="Aspire.StackExchange.Redis.OutputCaching" Version="9.3.0" />
     <PackageReference Include="nClam" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.5" />
+    <PackageReference Include="Microsoft.Extensions.ApiDescription.Server" Version="9.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Scalar.AspNetCore" Version="2.6.9" />
   </ItemGroup>
 
   <ItemGroup>

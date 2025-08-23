@@ -4,24 +4,25 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-	<OpenApiDocumentsDirectory>.</OpenApiDocumentsDirectory>
-	<OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
+    <OpenApiDocumentsDirectory>.</OpenApiDocumentsDirectory>
+    <OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
   </PropertyGroup>
 
   <ItemGroup>
-	<PackageReference Include="Aspire.Keycloak.Authentication" Version="9.3.0-preview.1.25265.20" />
-	<PackageReference Include="Aspire.MongoDB.Driver" Version="9.3.0" />
-	<PackageReference Include="Aspire.Seq" Version="9.3.0" />
-	<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.5" />
-	<PackageReference Include="Microsoft.Extensions.ApiDescription.Server" Version="9.0.8">
-	  <PrivateAssets>all</PrivateAssets>
-	  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-	</PackageReference>
-	<PackageReference Include="Scalar.AspNetCore" Version="2.6.9" />
+    <PackageReference Include="Aspire.Keycloak.Authentication" Version="9.3.0-preview.1.25265.20" />
+    <PackageReference Include="Aspire.MongoDB.Driver" Version="9.3.0" />
+    <PackageReference Include="Aspire.Seq" Version="9.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.5" />
+    <PackageReference Include="Microsoft.Extensions.ApiDescription.Server" Version="9.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Scalar.AspNetCore" Version="2.6.9" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AspireSample.Catalog.Infrastructure\AspireSample.Catalog.Infrastructure.csproj" />
+    <ProjectReference
+      Include="..\AspireSample.Catalog.Infrastructure\AspireSample.Catalog.Infrastructure.csproj" />
     <ProjectReference Include="..\AspireSample.ServiceDefaults\AspireSample.ServiceDefaults.csproj" />
     <ProjectReference Include="..\SharedKernel\SharedKernel.csproj" />
   </ItemGroup>
