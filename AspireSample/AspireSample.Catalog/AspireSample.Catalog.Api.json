@@ -1,8 +1,19 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "AspireSample.Catalog.Api | v1",
-    "version": "1.0.0"
+    "title": "Catalog Service",
+    "description": "Catalog Service",
+    "termsOfService": "https://dotnet.microsoft.com/en-us/",
+    "contact": {
+      "name": "Catalog Service",
+      "url": "https://dotnet.microsoft.com/en-us/",
+      "email": ""
+    },
+    "license": {
+      "name": "Use under LICX",
+      "url": "https://dotnet.microsoft.com/en-us/"
+    },
+    "version": "v1"
   },
   "paths": {
     "/api": {
@@ -21,7 +32,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
       }
     },
     "/cache/invalidate": {
@@ -48,7 +64,12 @@
           "401": {
             "description": "Unauthorized"
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
       }
     },
     "/clear-db": {
@@ -60,7 +81,12 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
       }
     },
     "/idempotency": {
@@ -82,7 +108,12 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
       }
     },
     "/api/products": {
@@ -95,7 +126,12 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
       },
       "post": {
         "tags": [
@@ -116,7 +152,12 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
       }
     },
     "/api/products/{id}": {
@@ -140,7 +181,12 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
       },
       "put": {
         "tags": [
@@ -172,7 +218,12 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
       },
       "delete": {
         "tags": [
@@ -194,7 +245,12 @@
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
       }
     }
   },
@@ -228,6 +284,14 @@
             "format": "double"
           }
         }
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "description": "JWT Authorization: Bearer {token}",
+        "scheme": "Bearer",
+        "bearerFormat": "Json Web Token"
       }
     }
   },

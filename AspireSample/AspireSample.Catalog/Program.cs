@@ -1,4 +1,4 @@
-using System.Net;
+using System.IdentityModel.Tokens.Jwt;
 using AspireSample.Catalog.Api.Features;
 using AspireSample.Catalog.Api.Features.Products;
 using AspireSample.Catalog.Infrastructure.Data;
@@ -6,6 +6,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using OpenTelemetry.Exporter;
 using Scalar.AspNetCore;
 
@@ -23,7 +24,16 @@ builder.Services.AddProblemDetails();
 builder.AddRedisDistributedCache("cache");
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddOptions<OpenApiInfo>()
+    .BindConfiguration("OpenApiInfo")
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer<OpenApiInfoTransformer>();
+    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+});
 
 builder.AddNpgsqlDbContext<CatalogDbContext>(
     "catalogdb",
@@ -55,15 +65,31 @@ builder.Services.AddAuthentication()
         realm: "AspireSample",
         options =>
         {
-            options.Audience = "account";
-            options.RequireHttpsMetadata = false;
+            options.Audience = "AspireSampleCatalogApi";
+            if (builder.Environment.IsDevelopment())
+            {
+                options.RequireHttpsMetadata = false;
+                options.Authority = "http://localhost:8082/realms/AspireSample";
+            }
+            else
+            {
+                options.Authority = "https://your-keycloak-server.com/realms/MyRealm";
+
+            }
+
+            options.TokenValidationParameters.NameClaimType = JwtRegisteredClaimNames.Name;
+            options.TokenValidationParameters.ValidateAudience = true;
+            options.TokenValidationParameters.ValidateIssuer = true;
+            options.TokenValidationParameters.ValidateLifetime = true;
         });
 
 builder.Services.AddAuthorization(options =>
 {
     options.DefaultPolicy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
-        .RequireClaim("scope", "catalog:read-write")
+        .RequireAssertion(context =>
+            context.User.HasClaim(c =>
+                c.Type == "scope" && c.Value.Split(' ').Contains("catalog:read-write")))
         .Build();
 
     options.FallbackPolicy = options.DefaultPolicy;
@@ -94,7 +120,7 @@ app.UseAuthorization();
 
 app.MapDefaultEndpoints();
 
-app.MapGet("/api", () => "Catalog Api").AllowAnonymous();
+app.MapGet("/api", () => "Catalog Api");
 
 app.MapPost("/cache/invalidate", static (
     [FromHeader(Name = "X-CacheInvalidation-Key")] string? header,

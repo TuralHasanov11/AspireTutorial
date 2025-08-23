@@ -2,6 +2,7 @@ using AspireSample.Web.Identity;
 using AspireSample.Web.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using OpenTelemetry.Exporter;
@@ -40,14 +41,32 @@ builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
         options =>
         {
             options.ClientId = "AspireSampleWeb";
+            if (builder.Environment.IsDevelopment())
+            {
+                options.RequireHttpsMetadata = false;
+                options.Authority = "http://localhost:8082/realms/AspireSample";
+            }
+            else
+            {
+                options.Authority = "https://your-keycloak-server.com/realms/MyRealm";
+
+            }
             options.ResponseType = OpenIdConnectResponseType.Code;
             options.Scope.Add("catalog:read-write");
-            options.RequireHttpsMetadata = false;
             options.TokenValidationParameters.NameClaimType = JwtRegisteredClaimNames.Name;
             options.SaveTokens = true;
             options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         })
     .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
+
+builder.Services.AddAuthorization(options =>
+{
+    options.DefaultPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+
+    options.FallbackPolicy = options.DefaultPolicy;
+});
 
 builder.Services.AddCascadingAuthenticationState();
 

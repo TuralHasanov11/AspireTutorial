@@ -5,13 +5,12 @@ var builder = DistributedApplication.CreateBuilder(args);
 builder.Services.AddLifecycleHook<LifecycleLogger>();
 
 
-var username = builder.AddParameter("KeycloakUsername");
+var username = builder.AddParameter("KeycloakUsername", secret: true);
 var password = builder.AddParameter("KeycloakPassword", secret: true);
-var keycloak = builder.AddKeycloak("keycloak", 8080, username, password)
+var keycloak = builder.AddKeycloak("keycloak", 8082, username, password)
     .WithDataVolume()
     //.WithRealmImport("./Realms");
-    .WithLifetime(ContainerLifetime.Persistent)
-    .WithExternalHttpEndpoints();
+    .WithLifetime(ContainerLifetime.Persistent);
 
 
 var ollama = builder.AddOllama("ollama")
