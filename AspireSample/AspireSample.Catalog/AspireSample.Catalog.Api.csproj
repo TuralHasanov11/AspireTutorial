@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <OpenApiDocumentsDirectory>.</OpenApiDocumentsDirectory>
     <OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
+    <UserSecretsId>98a5a243-f9d2-4308-92bc-58cd60dbd6d4</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,8 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference
-      Include="..\AspireSample.Catalog.Infrastructure\AspireSample.Catalog.Infrastructure.csproj" />
+    <ProjectReference Include="..\AspireSample.Catalog.Infrastructure\AspireSample.Catalog.Infrastructure.csproj" />
     <ProjectReference Include="..\AspireSample.ServiceDefaults\AspireSample.ServiceDefaults.csproj" />
     <ProjectReference Include="..\SharedKernel\SharedKernel.csproj" />
   </ItemGroup>
