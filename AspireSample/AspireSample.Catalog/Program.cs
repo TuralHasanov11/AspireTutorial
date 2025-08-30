@@ -102,6 +102,11 @@ builder.Services.AddScoped<ILinkService, LinkService>();
 
 var app = builder.Build();
 
+if (!app.Environment.IsProduction())
+{
+    app.UseHttpLogging();
+}
+
 // Configure the HTTP request pipeline.
 app.UseExceptionHandler();
 

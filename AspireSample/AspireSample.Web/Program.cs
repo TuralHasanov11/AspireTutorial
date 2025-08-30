@@ -89,6 +89,11 @@ builder.Services.AddTransient<IAntiVirusService, AntiVirusService>();
 
 var app = builder.Build();
 
+if (!app.Environment.IsProduction())
+{
+    app.UseHttpLogging();
+}
+
 app.MapDefaultEndpoints();
 
 // Configure the HTTP request pipeline.

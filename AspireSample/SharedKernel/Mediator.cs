@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AspireSample.SharedKernel;
+namespace SharedKernel;
 
 
 public interface IRequest<TResponse> { }

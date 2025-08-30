@@ -1,15 +1,23 @@
+using System.Text;
 using AspireSample.ServiceDefaults;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Diagnostics.Logging;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.HttpLogging;
+using Microsoft.Extensions.Compliance.Classification;
+using Microsoft.Extensions.Compliance.Redaction;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Http.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.ServiceDiscovery;
+using Microsoft.Net.Http.Headers;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using SharedKernel;
 
 namespace Microsoft.Extensions.Hosting;
 
@@ -68,6 +76,41 @@ public static class Extensions
 
         builder.Services.Configure<HostOptions>(builder.Configuration.GetSection("Host"));
 
+        builder.Services.AddRedaction(options =>
+        {
+            // EUP: HMAC redactor
+            options.SetHmacRedactor(r =>
+            {
+                r.KeyId = 123456789;
+                r.Key = Convert.ToBase64String(Encoding.UTF8.GetBytes("uVtXrJ3k5g5p7+Xl5f8uVtXrJ3k5g5p7+Xl5f8uVtXrJ3k5g5p7+Xl5f8="));
+            }, LoggingTaxonomyDefinitions.EUPDataClassification);
+
+            // EUII: Secret redactor
+            options.SetRedactor<SecretRedactor>(new DataClassificationSet(LoggingTaxonomyDefinitions.EUIIDataClassification));
+
+            // CustomerData: Erasing redactor
+            options.SetRedactor<ErasingRedactor>(new DataClassificationSet(LoggingTaxonomyDefinitions.CustomerDataClassification));
+
+            // AdministratorData: Erasing redactor
+            options.SetRedactor<ErasingRedactor>(new DataClassificationSet(LoggingTaxonomyDefinitions.AdministratorDataClassification));
+
+            // FeedbackData: Erasing redactor
+            options.SetRedactor<ErasingRedactor>(new DataClassificationSet(LoggingTaxonomyDefinitions.FeedbackDataClassification));
+        });
+
+        builder.Services.AddHttpLogging(options => { });
+
+        builder.Services.AddHttpLoggingRedaction(op =>
+        {
+            op.RequestPathParameterRedactionMode = HttpRouteParameterRedactionMode.Strict;
+            op.RequestPathLoggingMode = IncomingPathLoggingMode.Structured;
+            op.RequestHeadersDataClasses.Add(HeaderNames.Authorization, LoggingTaxonomyDefinitions.EUIIDataClassification);
+            op.RouteParameterDataClasses = new Dictionary<string, DataClassification>
+            {
+                { "id", LoggingTaxonomyDefinitions.EUIIDataClassification },
+            };
+        });
+
         return builder;
     }
 
@@ -114,12 +157,7 @@ public static class Extensions
             builder.Services.AddOpenTelemetry().UseOtlpExporter();
         }
 
-        // Uncomment the following lines to enable the Azure Monitor exporter (requires the Azure.Monitor.OpenTelemetry.AspNetCore package)
-        //if (!string.IsNullOrEmpty(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
-        //{
-        //    builder.Services.AddOpenTelemetry()
-        //       .UseAzureMonitor();
-        //}
+        // Azure Monitor exporter setup is available. See documentation for details.
 
         return builder;
     }
