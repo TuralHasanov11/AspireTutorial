@@ -5,13 +5,12 @@ var builder = DistributedApplication.CreateBuilder(args);
 builder.Services.AddLifecycleHook<LifecycleLogger>();
 
 
-var username = builder.AddParameter("KeycloakUsername");
+var username = builder.AddParameter("KeycloakUsername", secret: true);
 var password = builder.AddParameter("KeycloakPassword", secret: true);
-var keycloak = builder.AddKeycloak("keycloak", 8080, username, password)
+var keycloak = builder.AddKeycloak("keycloak", 8082, username, password)
     .WithDataVolume()
     //.WithRealmImport("./Realms");
-    .WithLifetime(ContainerLifetime.Persistent)
-    .WithExternalHttpEndpoints();
+    .WithLifetime(ContainerLifetime.Persistent);
 
 
 var ollama = builder.AddOllama("ollama")
@@ -74,7 +73,7 @@ var catalogService = builder.AddProject<Projects.AspireSample_Catalog_Api>("cata
     .WithUrlForEndpoint("https", url =>
     {
         url.DisplayText = "Scalar (HTTPS)";
-        url.Url += "/scalar";
+        url.Url += "/scalar/v1";
     })
     .WithEnvironment("API_CACHE_INVALIDATION_KEY", apiCacheInvalidationKey)
     .WithClearCache(apiCacheInvalidationKey)
@@ -91,6 +90,11 @@ var catalogService = builder.AddProject<Projects.AspireSample_Catalog_Api>("cata
 
 builder.AddProject<Projects.AspireSample_Web>("webfrontend")
     .WithExternalHttpEndpoints()
+    .WithUrlForEndpoint("https", url =>
+    {
+        url.DisplayText = "Scalar (HTTPS)";
+        url.Url += "/scalar/v1";
+    })
     .WithReference(cache)
     .WaitFor(cache)
     .WithReference(catalogService)
@@ -108,30 +112,32 @@ builder.AddProject<Projects.AspireSample_WorkerService>("workerservice")
 
 
 
-//builder.AddNpmApp("reactappclient", "../reactapp.client", "dev")
-//    .WithEnvironment("BROWSER", "none") // Disable opening browser on npm start
-//    .WithHttpEndpoint(env: "VITE_PORT")
-//    .WithExternalHttpEndpoints()
-//    .PublishAsDockerFile();
+builder.AddNpmApp("reactappclient", "../ReactApp.Client", "dev")
+    .WithReference(catalogService)
+    .WithEnvironment("BROWSER", "none") // Disable opening browser on npm start
+    .WithHttpEndpoint(env: "VITE_PORT")
+    .WithExternalHttpEndpoints()
+    .PublishAsDockerFile();
 
 builder.AddNpmApp("vueappclient", "../vueapp.client", "dev")
     .WithReference(catalogService)
-    .WaitFor(catalogService)
     .WithHttpEndpoint(env: "VITE_PORT")
     .WithExternalHttpEndpoints()
     .PublishAsDockerFile();
 
 
-builder.AddProject<Projects.AiChatApp>("aichatapp")
-    .WithExternalHttpEndpoints()
-    .WithReference(cache)
-    .WaitFor(cache)
-    .WithReference(catalogService)
-    .WaitFor(catalogService)
-    .WithReference(seq)
-    .WaitFor(seq)
-    .WithReference(keycloak)
-    .WaitFor(keycloak);
+//builder.AddProject<Projects.AiChatApp>("aichatapp")
+//    .WithExternalHttpEndpoints()
+//    .WithReference(ollama)
+//    .WaitFor(ollama)
+//    .WithReference(cache)
+//    .WaitFor(cache)
+//    .WithReference(catalogService)
+//    .WaitFor(catalogService)
+//    .WithReference(seq)
+//    .WaitFor(seq)
+//    .WithReference(keycloak)
+//    .WaitFor(keycloak);
 
 
 //builder.AddAzureContainerAppEnvironment("myEnv");

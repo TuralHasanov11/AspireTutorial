@@ -1,16 +1,24 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <OpenApiDocumentsDirectory>.</OpenApiDocumentsDirectory>
+    <OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
+    <UserSecretsId>98a5a243-f9d2-4308-92bc-58cd60dbd6d4</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-	<PackageReference Include="Aspire.Keycloak.Authentication" Version="9.3.0-preview.1.25265.20" />
-	<PackageReference Include="Aspire.MongoDB.Driver" Version="9.3.0" />
-	<PackageReference Include="Aspire.Seq" Version="9.3.0" />
-	<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.5" />
+    <PackageReference Include="Aspire.Keycloak.Authentication" Version="9.3.0-preview.1.25265.20" />
+    <PackageReference Include="Aspire.MongoDB.Driver" Version="9.3.0" />
+    <PackageReference Include="Aspire.Seq" Version="9.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.5" />
+    <PackageReference Include="Microsoft.Extensions.ApiDescription.Server" Version="9.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Scalar.AspNetCore" Version="2.6.9" />
   </ItemGroup>
 
   <ItemGroup>

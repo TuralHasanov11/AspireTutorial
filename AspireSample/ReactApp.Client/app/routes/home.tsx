@@ -1,13 +1,23 @@
-import type { Route } from './+types/home'
-import { Welcome } from '../welcome/welcome'
+import type { Route } from "./+types/home";
+import { Welcome } from "../welcome/welcome";
+import { useEffect } from "react";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: 'New React Router App' },
-    { name: 'description', content: 'Welcome to React Router!' },
-  ]
+    { title: "New React Router App" },
+    { name: "description", content: "Welcome to React Router!" },
+  ];
 }
 
 export default function Home() {
-  return <Welcome />
+  useEffect(() => {
+    async function ping() {
+      const response = await fetch("/api/catalog");
+      const text = await response.text();
+      console.log(text);
+    }
+    ping();
+  }, []);
+
+  return <Welcome />;
 }

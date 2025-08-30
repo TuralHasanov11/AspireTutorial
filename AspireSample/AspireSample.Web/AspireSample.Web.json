@@ -1,0 +1,131 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Web App",
+    "description": "Web App",
+    "termsOfService": "https://dotnet.microsoft.com/en-us/",
+    "contact": {
+      "name": "Web App",
+      "url": "https://dotnet.microsoft.com/en-us/",
+      "email": ""
+    },
+    "license": {
+      "name": "Use under LICX",
+      "url": "https://dotnet.microsoft.com/en-us/"
+    },
+    "version": "v1"
+  },
+  "paths": {
+    "/apiservice": {
+      "get": {
+        "tags": [
+          "AspireSample.Web"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": [
+              "catalog:read-write"
+            ]
+          }
+        ]
+      }
+    },
+    "/identity/login": {
+      "get": {
+        "tags": [
+          "Endpoints"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": [
+              "catalog:read-write"
+            ]
+          }
+        ]
+      }
+    },
+    "/identity/logout": {
+      "post": {
+        "tags": [
+          "Endpoints"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": [
+              "catalog:read-write"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/identity/claims": {
+      "get": {
+        "tags": [
+          "AspireSample.Web"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2": [
+              "catalog:read-write"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "OAuth2": {
+        "type": "oauth2",
+        "description": "OAuth2 Authorization Code Flow (Keycloak)",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "http://localhost:8082/realms/AspireSample/protocol/openid-connect/auth",
+            "tokenUrl": "http://localhost:8082/realms/AspireSample/protocol/openid-connect/token",
+            "scopes": {
+              "catalog:read-write": "Read and write access to catalog"
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "AspireSample.Web"
+    },
+    {
+      "name": "Endpoints"
+    }
+  ]
+}

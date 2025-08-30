@@ -1,10 +1,14 @@
+using AspireSample.Web;
 using AspireSample.Web.Identity;
 using AspireSample.Web.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.OpenApi.Models;
 using OpenTelemetry.Exporter;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,16 +44,46 @@ builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
         options =>
         {
             options.ClientId = "AspireSampleWeb";
+            if (builder.Environment.IsDevelopment())
+            {
+                options.RequireHttpsMetadata = false;
+                options.Authority = "http://localhost:8082/realms/AspireSample";
+            }
+            else
+            {
+                options.Authority = "https://your-keycloak-server.com/realms/MyRealm";
+
+            }
             options.ResponseType = OpenIdConnectResponseType.Code;
             options.Scope.Add("catalog:read-write");
-            options.RequireHttpsMetadata = false;
             options.TokenValidationParameters.NameClaimType = JwtRegisteredClaimNames.Name;
             options.SaveTokens = true;
             options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         })
     .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
 
+builder.Services.AddAuthorization(options =>
+{
+    options.DefaultPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+
+    options.FallbackPolicy = options.DefaultPolicy;
+});
+
 builder.Services.AddCascadingAuthenticationState();
+
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddOptions<OpenApiInfo>()
+    .BindConfiguration("OpenApiInfo")
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer<OpenApiInfoTransformer>();
+    options.AddDocumentTransformer<OAuth2SecuritySchemeTransformer>();
+});
 
 builder.Services.AddTransient<IAntiVirusService, AntiVirusService>();
 
@@ -63,6 +97,20 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+}
+
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi().AllowAnonymous();
+    app.MapScalarApiReference(options => options
+        .AddPreferredSecuritySchemes("OAuth2")
+        .AddAuthorizationCodeFlow("OAuth2", flow =>
+        {
+            flow.ClientId = "AspireSampleWeb";
+            //flow.ClientSecret = "scalar-demo-secret";
+            flow.RedirectUri = "https://localhost:7260/signin-oidc";
+            //flow.Pkce = Pkce.Sha256;
+        })).AllowAnonymous();
 }
 
 app.UseHttpsRedirection();
